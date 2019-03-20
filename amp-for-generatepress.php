@@ -203,10 +203,10 @@ function gpamp_add_sub_menu_dropdown_toggles( $item_output, $item ) {
 	);
 
 	$dropdown_button .= sprintf(
-        ' aria-expanded="%s" [aria-expanded]="%s"',
-        esc_attr( wp_json_encode( $expanded ) ),
-        esc_attr( "$expanded_state_id ? 'true' : 'false'" )
-    );
+		' aria-expanded="%s" [aria-expanded]="%s"',
+		esc_attr( wp_json_encode( $expanded ) ),
+		esc_attr( "$expanded_state_id ? 'true' : 'false'" )
+	);
 
 	$dropdown_button .= sprintf(
 		' on="%s"',
