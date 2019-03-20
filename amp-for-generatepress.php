@@ -40,123 +40,222 @@ function ampgp_do_scripts() {
 		wp_dequeue_style( 'generate-offside' );
 
 		wp_enqueue_style( 'gpamp', plugin_dir_url( __FILE__ ) . 'amp.css', array(), AMPGP_VERSION );
+		wp_add_inline_style( 'generate-navigation-branding', ampgp_navigation_logo() );
 	}
 }
 
-add_action( 'wp', 'ampgp_replace_navigation' );
 /**
- * Replace our navigation with the AMP version.
+ * Add a fixed width to our navigation logo.
  *
  * @since 0.1
  */
-function ampgp_replace_navigation() {
+function ampgp_navigation_logo() {
+	if ( ! class_exists( 'GeneratePress_CSS' ) ) {
+		return;
+	}
+
+	if ( ! function_exists( 'generate_menu_plus_get_defaults' ) ) {
+		return;
+	}
+
+	$menu_plus_settings = wp_parse_args(
+		get_option( 'generate_menu_plus_settings', array() ),
+		generate_menu_plus_get_defaults()
+	);
+
+	$css = new GeneratePress_CSS;
+
+	if ( isset( $menu_plus_settings['navigation_as_header'] ) && $menu_plus_settings['navigation_as_header'] ) {
+		if ( get_theme_mod( 'custom_logo' ) ) {
+			$data = wp_get_attachment_metadata( get_theme_mod( 'custom_logo' ) );
+			$width = false;
+			$height = false;
+
+			if ( ! empty( $data ) ) {
+				if ( isset( $data['width'] ) ) {
+					$width = $data['width'];
+				}
+
+				if ( isset( $data['height'] ) ) {
+					$height = $data['height'];
+				}
+			}
+
+			if ( $height && $width ) {
+				$navigation_height = 60;
+				$mobile_navigation_height = '';
+
+				if ( function_exists( 'generate_spacing_get_defaults' ) ) {
+					$spacing_settings = wp_parse_args(
+						get_option( 'generate_spacing_settings', array() ),
+						generate_spacing_get_defaults()
+					);
+
+					$navigation_height = $spacing_settings['menu_item_height'];
+
+					if ( isset( $spacing_settings['mobile_menu_item_height'] ) ) {
+						$mobile_navigation_height = $spacing_settings['mobile_menu_item_height'];
+					}
+				}
+
+				// Find our aspect ratio.
+				$scale = $width / $height;
+
+				$navigation_height = $navigation_height - 20;
+				$width = $navigation_height * $scale;
+
+				$css->set_selector( '.navigation-branding img' );
+				$css->add_property( 'height', $navigation_height, false, 'px' );
+				$css->add_property( 'width', $width, false, 'px' );
+				$css->add_property( 'padding', '0px' );
+
+				$mobile_menu_query = apply_filters( 'generate_mobile_menu_media_query', '(max-width: 768px)' );
+
+				if ( is_int( $mobile_navigation_height ) ) {
+					$mobile_navigation_height = $mobile_navigation_height - 20;
+					$mobile_width = $mobile_navigation_height * $scale;
+
+					$css->start_media_query( $mobile_menu_query );
+						$css->set_selector( '.navigation-branding img' );
+						$css->add_property( 'height', $mobile_navigation_height, false, 'px' );
+						$css->add_property( 'width', $mobile_width, false, 'px' );
+					$css->stop_media_query();
+				}
+			}
+		}
+	}
+
+	if ( 'enable' === $menu_plus_settings['mobile_header'] && '' !== $menu_plus_settings['mobile_header_logo'] ) {
+		$image_id = false;
+
+		if ( function_exists( 'attachment_url_to_postid' ) ) {
+			$image_id = attachment_url_to_postid( $menu_plus_settings['mobile_header_logo'] );
+		}
+
+		if ( $image_id ) {
+			$data = wp_get_attachment_metadata( $image_id );
+			$width = false;
+			$height = false;
+
+			if ( ! empty( $data ) ) {
+				if ( isset( $data['width'] ) ) {
+					$width = $data['width'];
+				}
+
+				if ( isset( $data['height'] ) ) {
+					$height = $data['height'];
+				}
+			}
+
+			if ( $height && $width ) {
+				$navigation_height = 60;
+				$mobile_navigation_height = '';
+
+				if ( function_exists( 'generate_spacing_get_defaults' ) ) {
+					$spacing_settings = wp_parse_args(
+						get_option( 'generate_spacing_settings', array() ),
+						generate_spacing_get_defaults()
+					);
+
+					$navigation_height = $spacing_settings['menu_item_height'];
+
+					if ( isset( $spacing_settings['mobile_menu_item_height'] ) ) {
+						$mobile_navigation_height = $spacing_settings['mobile_menu_item_height'];
+					}
+				}
+
+				// Find our aspect ratio.
+				$scale = $width / $height;
+
+				$navigation_height = $navigation_height - 20;
+				$width = $navigation_height * $scale;
+
+				$css->set_selector( '.mobile-header-navigation .site-logo.mobile-header-logo img' );
+				$css->add_property( 'height', $navigation_height, false, 'px' );
+				$css->add_property( 'width', $width, false, 'px' );
+				$css->add_property( 'padding', '0px' );
+
+				$mobile_menu_query = apply_filters( 'generate_mobile_menu_media_query', '(max-width: 768px)' );
+
+				if ( is_int( $mobile_navigation_height ) ) {
+					$mobile_navigation_height = $mobile_navigation_height - 20;
+					$mobile_width = $mobile_navigation_height * $scale;
+
+					$css->start_media_query( $mobile_menu_query );
+						$css->set_selector( '.mobile-header-navigation .site-logo.mobile-header-logo img' );
+						$css->add_property( 'height', $mobile_navigation_height, false, 'px' );
+						$css->add_property( 'width', $mobile_width, false, 'px' );
+					$css->stop_media_query();
+				}
+			}
+		}
+	}
+
+	return $css->css_output();
+}
+
+add_action( 'generate_after_footer','ampgp_do_toggled_nav' );
+/**
+ * Without the .toggled element on the page, AMP won't include the necessary CSS.
+ *
+ * @since 0.1
+ */
+function ampgp_do_toggled_nav() {
 	if ( ! ampgp_is_amp() ) {
 		return;
 	}
 
-	remove_action( 'generate_after_header', 'generate_add_navigation_after_header', 5 );
-	remove_action( 'generate_before_header', 'generate_add_navigation_before_header', 5 );
-	remove_action( 'generate_after_header_content', 'generate_add_navigation_float_right', 5 );
-	remove_action( 'generate_before_right_sidebar_content', 'generate_add_navigation_before_right_sidebar', 5 );
-	remove_action( 'generate_before_left_sidebar_content', 'generate_add_navigation_before_left_sidebar', 5 );
-
-	if ( ! function_exists( 'generate_get_navigation_location' ) ) {
-		return;
-	}
-
-	if ( 'nav-below-header' === generate_get_navigation_location() ) {
-		add_action( 'generate_after_header', 'ampgp_do_primary_navigation', 5 );
-	}
-
-	if ( 'nav-above-header' === generate_get_navigation_location() ) {
-		add_action( 'generate_before_header', 'ampgp_do_primary_navigation', 5 );
-	}
-
-	if ( 'nav-float-right' === generate_get_navigation_location() || 'nav-float-left' == generate_get_navigation_location() ) {
-		add_action( 'generate_after_header_content', 'ampgp_do_primary_navigation', 5 );
-	}
-
-	if ( 'nav-right-sidebar' === generate_get_navigation_location() ) {
-		add_action( 'generate_before_right_sidebar_content', 'ampgp_do_primary_navigation', 5 );
-	}
-
-	if ( 'nav-left-sidebar' === generate_get_navigation_location() ) {
-		add_action( 'generate_before_left_sidebar_content', 'ampgp_do_primary_navigation', 5 );
-	}
+	echo '<div class="main-navigation toggled amp-tree-shaking-help" style="display: none;"></div>';
 }
 
+add_action( 'generate_inside_navigation', 'ampgp_do_menu_toggle' );
+add_action( 'generate_inside_mobile_header', 'ampgp_do_menu_toggle' );
 /**
- * Do the AMP navigation.
+ * Insert our AMP-specific menu toggle.
  *
  * @since 0.1
  */
-function ampgp_do_primary_navigation() {
-	if ( ! function_exists( 'generate_get_element_classes' ) ) {
+function ampgp_do_menu_toggle() {
+	if ( ! ampgp_is_amp() ) {
 		return;
 	}
 
-	$navigation_classes = implode( ' ', generate_get_element_classes( 'navigation' ) );
+	$navigation = 'site-navigation';
+
+	if ( 'generate_inside_mobile_header' === current_action() ) {
+		$navigation = 'mobile-header';
+	}
 	?>
-		<amp-state id="navMenuExpanded">
-			<script type="application/json">false</script>
-		</amp-state>
-
-		<?php if ( 'nav-right-sidebar' === generate_get_navigation_location() || 'nav-left-sidebar' === generate_get_navigation_location() ) : ?>
-			<div class="gen-sidebar-nav">
-		<?php endif; ?>
-
-		<nav
-			id="site-navigation"
-			class="<?php echo $navigation_classes; ?>"
-			[class]="'<?php echo $navigation_classes; ?>' + ( navMenuExpanded ? ' toggled' : '' )"
+		<button
+			class="menu-toggle amp-menu-toggle"
+			on="tap:<?php echo $navigation; ?>.toggleClass( 'class' = 'toggled' ),AMP.setState( { navMenuExpanded: ! navMenuExpanded } )"
 			aria-expanded="false"
 			[aria-expanded]="navMenuExpanded ? 'true' : 'false'"
 		>
-			<div <?php generate_do_element_classes( 'inside_navigation' ); ?>>
-				<?php
-				/**
-				 * generate_inside_navigation hook.
-				 *
-				 * @since 0.1
-				 *
-				 * @hooked generate_navigation_search - 10
-				 * @hooked generate_mobile_menu_search_icon - 10
-				 */
-				do_action( 'generate_inside_navigation' );
-				?>
-				<button
-					class="menu-toggle amp-menu-toggle"
-					on="tap:AMP.setState( { navMenuExpanded: ! navMenuExpanded } )"
-					[class]="'menu-toggle' + ( navMenuExpanded ? ' toggled-on' : '' )"
-					aria-expanded="false"
-					[aria-expanded]="navMenuExpanded ? 'true' : 'false'"
-				>
-					<?php do_action( 'generate_inside_mobile_menu' ); ?>
-		        	<span class="mobile-menu"><?php echo apply_filters( 'generate_mobile_menu_label', __( 'Menu', 'gp-amp' ) ); // WPCS: XSS ok. ?></span>
-				</button>
-				<?php
-				wp_nav_menu(
-					array(
-						'theme_location' => 'primary',
-						'container' => 'div',
-						'container_class' => 'main-nav',
-						'container_id' => 'primary-menu',
-						'menu_class' => '',
-						'fallback_cb' => 'generate_menu_fallback',
-						'items_wrap' => '<ul id="%1$s" class="%2$s ' . join( ' ', generate_get_element_classes( 'menu' ) ) . '">%3$s</ul>',
-					)
-				);
-				?>
-			</div><!-- .inside-navigation -->
-		</nav><!-- #site-navigation -->
-
-		<?php if ( 'nav-right-sidebar' === generate_get_navigation_location() || 'nav-left-sidebar' === generate_get_navigation_location() ) : ?>
-			</div>
-		<?php endif; ?>
+			<?php do_action( 'generate_inside_mobile_menu' ); ?>
+			<span class="mobile-menu"><?php echo apply_filters( 'generate_mobile_menu_label', __( 'Menu', 'gp-amp' ) ); // WPCS: XSS ok. ?></span>
+		</button>
 	<?php
 }
 
-add_filter( 'walker_nav_menu_start_el', 'gpamp_add_sub_menu_dropdown_toggles', 10, 2 );
+add_filter( 'generate_navigation_microdata', 'ampgp_do_navigation_data' );
+/**
+ * Add our AMP data to the navigation.
+ *
+ * @since 0.1
+ */
+function ampgp_do_navigation_data( $data ) {
+	if ( ! ampgp_is_amp() ) {
+		return $data;
+	}
+
+	return sprintf(
+		'[aria-expanded]="%s"',
+		"navMenuExpanded ? 'true' : 'false'"
+	);
+}
+
+add_filter( 'walker_nav_menu_start_el', 'gpamp_add_sub_menu_dropdown_toggles', 10, 4 );
 /**
  * Filter the HTML output of a nav menu item to add the AMP dropdown button to reveal the sub-menu.
  *
