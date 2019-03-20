@@ -164,64 +164,65 @@ add_filter( 'walker_nav_menu_start_el', 'gpamp_add_sub_menu_dropdown_toggles', 1
  * @return string Modified nav menu item HTML.
  */
 function gpamp_add_sub_menu_dropdown_toggles( $item_output, $item ) {
+	// Only add the buttons in AMP responses.
+	if ( ! ampgp_is_amp() ) {
+		return $item_output;
+	}
 
-    // Only add the buttons in AMP responses.
-    if ( ! ampgp_is_amp() ) {
-        return $item_output;
-    }
+	// Skip when the item has no sub-menu.
+	if ( ! in_array( 'menu-item-has-children', $item->classes, true ) ) {
+		return $item_output;
+	}
 
-    // Skip when the item has no sub-menu.
-    if ( ! in_array( 'menu-item-has-children', $item->classes, true ) ) {
-        return $item_output;
-    }
+	// Obtain the initial expanded state.
+	$expanded = in_array( 'current-menu-ancestor', $item->classes, true );
 
-    // Obtain the initial expanded state.
-    $expanded = in_array( 'current-menu-ancestor', $item->classes, true );
+	// Generate a unique state ID.
+	static $nav_menu_item_number = 0;
+	$nav_menu_item_number++;
+	$expanded_state_id = 'navMenuItemExpanded' . $nav_menu_item_number;
 
-    // Generate a unique state ID.
-    static $nav_menu_item_number = 0;
-    $nav_menu_item_number++;
-    $expanded_state_id = 'navMenuItemExpanded' . $nav_menu_item_number;
+	// Create new state for managing storing the whether the sub-menu is expanded.
+	$item_output .= sprintf(
+		'<amp-state id="%s"><script type="application/json">%s</script></amp-state>',
+		esc_attr( $expanded_state_id ),
+		wp_json_encode( $expanded )
+	);
 
-    // Create new state for managing storing the whether the sub-menu is expanded.
-    $item_output .= sprintf(
-        '<amp-state id="%s"><script type="application/json">%s</script></amp-state>',
-        esc_attr( $expanded_state_id ),
-        wp_json_encode( $expanded )
-    );
+	/*
+	 * Create the toggle button which mutates the state and which has class and
+	 * aria-expanded attributes which react to the state changes.
+	 */
+	$dropdown_button  = '<button';
+	$dropdown_class   = 'dropdown-menu-toggle';
+	$toggled_class    = 'toggled-on';
+	$dropdown_button .= sprintf(
+		' class="%s" [class]="%s"',
+		esc_attr( $dropdown_class . ( $expanded ? " $toggled_class" : '' ) ),
+		esc_attr( sprintf( "%s + ( $expanded_state_id ? %s : '' )", wp_json_encode( $dropdown_class ), wp_json_encode( " $toggled_class" ) ) )
+	);
 
-    /*
-     * Create the toggle button which mutates the state and which has class and
-     * aria-expanded attributes which react to the state changes.
-     */
-    $dropdown_button  = '<button';
-    $dropdown_class   = 'dropdown-menu-toggle';
-    $toggled_class    = 'toggled-on';
-    $dropdown_button .= sprintf(
-        ' class="%s" [class]="%s"',
-        esc_attr( $dropdown_class . ( $expanded ? " $toggled_class" : '' ) ),
-        esc_attr( sprintf( "%s + ( $expanded_state_id ? %s : '' )", wp_json_encode( $dropdown_class ), wp_json_encode( " $toggled_class" ) ) )
-    );
-    $dropdown_button .= sprintf(
+	$dropdown_button .= sprintf(
         ' aria-expanded="%s" [aria-expanded]="%s"',
         esc_attr( wp_json_encode( $expanded ) ),
         esc_attr( "$expanded_state_id ? 'true' : 'false'" )
     );
-    $dropdown_button .= sprintf(
-        ' on="%s"',
-        esc_attr( "tap:AMP.setState( { $expanded_state_id: ! $expanded_state_id } )" )
-    );
-    $dropdown_button .= '>';
 
-    // Let the screen reader text in the button also update based on the expanded state.
-    $dropdown_button .= sprintf(
-        '<span class="screen-reader-text" [text]="%s">%s</span>',
-        esc_attr( sprintf( "$expanded_state_id ? %s : %s", wp_json_encode( __( 'collapse child menu', 'gp-amp' ) ), wp_json_encode( __( 'expand child menu', 'gp-amp' ) ) ) ),
-        esc_html( $expanded ? __( 'collapse child menu', 'example' ) : __( 'expand child menu', 'gp-amp' ) )
-    );
+	$dropdown_button .= sprintf(
+		' on="%s"',
+		esc_attr( "tap:AMP.setState( { $expanded_state_id: ! $expanded_state_id } )" )
+	);
+	$dropdown_button .= '>';
 
-    $dropdown_button .= '</button>';
+	// Let the screen reader text in the button also update based on the expanded state.
+	$dropdown_button .= sprintf(
+		'<span class="screen-reader-text" [text]="%s">%s</span>',
+		esc_attr( sprintf( "$expanded_state_id ? %s : %s", wp_json_encode( __( 'collapse child menu', 'gp-amp' ) ), wp_json_encode( __( 'expand child menu', 'gp-amp' ) ) ) ),
+		esc_html( $expanded ? __( 'collapse child menu', 'example' ) : __( 'expand child menu', 'gp-amp' ) )
+	);
 
-    $item_output .= $dropdown_button;
-    return $item_output;
+	$dropdown_button .= '</button>';
+
+	$item_output .= $dropdown_button;
+	return $item_output;
 }
