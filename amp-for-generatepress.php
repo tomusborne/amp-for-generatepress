@@ -166,9 +166,13 @@ add_filter( 'walker_nav_menu_start_el', 'gpamp_add_sub_menu_dropdown_toggles', 1
  * @param object $item          Nav menu item.
  * @return string Modified nav menu item HTML.
  */
-function gpamp_add_sub_menu_dropdown_toggles( $item_output, $item ) {
+function gpamp_add_sub_menu_dropdown_toggles( $item_output, $item, $depth, $args ) {
 	// Only add the buttons in AMP responses.
 	if ( ! ampgp_is_amp() ) {
+		return $item_output;
+	}
+
+	if ( 'main-nav' !== $args->container_class ) {
 		return $item_output;
 	}
 
