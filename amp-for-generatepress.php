@@ -31,10 +31,9 @@ function ampgp_do_scripts() {
 	if ( ampgp_is_amp() ) {
 		wp_dequeue_script( 'generate-menu' );
 		wp_dequeue_script( 'generate-a11y' );
+		wp_dequeue_script( 'generate-classlist' );
 		wp_dequeue_script( 'generate-sticky' );
 		wp_dequeue_script( 'generate-offside' );
-		wp_dequeue_script( 'generate-navigation-search' );
-		wp_dequeue_script( 'generate-back-to-top' );
 
 		wp_dequeue_style( 'generate-sticky' );
 		wp_dequeue_style( 'generate-offside' );
@@ -42,6 +41,33 @@ function ampgp_do_scripts() {
 		wp_enqueue_style( 'gpamp', plugin_dir_url( __FILE__ ) . 'amp.css', array(), AMPGP_VERSION );
 		wp_add_inline_style( 'generate-navigation-branding', ampgp_navigation_logo() );
 	}
+}
+
+/**
+ * Some settings will have to change if AMP is active.
+ *
+ * @since 0.1
+ */
+function ampgp_do_generate_settings( $options ) {
+	$options['nav_dropdown_type'] = 'hover';
+	$options['back_to_top'] = '';
+	$options['nav_search'] = 'disable';
+
+	return $options;
+}
+
+add_action( 'wp', 'ampgp_do_setup' );
+/**
+ * Do things that need to run once ampgp_is_amp() is available.
+ *
+ * @since 0.1
+ */
+function ampgp_do_setup() {
+	if ( ! ampgp_is_amp() ) {
+		return;
+	}
+
+	add_filter( 'option_generate_settings', 'ampgp_do_generate_settings' );
 }
 
 /**

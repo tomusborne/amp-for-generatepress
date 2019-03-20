@@ -42,8 +42,6 @@ button.menu-toggle:not(.amp-menu-toggle),
     display: none;
 }
 
-#site-navigation .search-item,
-#site-navigation .slideout-toggle,
-#mobile-header .search-item {
+#site-navigation .slideout-toggle {
 	display: none;
 }
