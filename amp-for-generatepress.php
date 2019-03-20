@@ -21,7 +21,7 @@ function ampgp_is_amp() {
 	return function_exists( 'is_amp_endpoint' ) && is_amp_endpoint();
 }
 
-add_action( 'wp_enqueue_scripts', 'ampgp_do_scripts', 100 );
+add_action( 'wp_enqueue_scripts', 'ampgp_do_scripts', 500 );
 /**
  * Remove scripts not compatible with AMP.
  *
@@ -32,6 +32,9 @@ function ampgp_do_scripts() {
 		wp_dequeue_script( 'generate-menu' );
 		wp_dequeue_script( 'generate-a11y' );
 		wp_dequeue_script( 'generate-sticky' );
+		wp_dequeue_script( 'generate-offside' );
+		wp_dequeue_script( 'generate-navigation-search' );
+		wp_dequeue_script( 'generate-back-to-top' );
 
 		wp_dequeue_style( 'generate-sticky' );
 		wp_dequeue_style( 'generate-offside' );

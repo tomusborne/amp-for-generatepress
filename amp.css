@@ -36,3 +36,8 @@ button.dropdown-menu-toggle.toggled-on + .sub-menu {
 .main-navigation.toggled li button.dropdown-menu-toggle.toggled-on:before {
 	content: "\f106" !important;
 }
+#site-navigation .search-item,
+#site-navigation .slideout-toggle,
+#mobile-header .search-item {
+	display: none;
+}
