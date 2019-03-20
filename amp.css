@@ -1,0 +1,38 @@
+.toggled .menu-item-has-children span.dropdown-menu-toggle {
+	display: none;
+}
+
+.menu-item-has-children button.dropdown-menu-toggle {
+	display: none;
+	position: absolute;
+	top: 0;
+	right: 0;
+	background-color: transparent;
+}
+
+.toggled .menu-item-has-children button.dropdown-menu-toggle {
+	display: inline-block;
+}
+
+button.dropdown-menu-toggle.toggled-on + .sub-menu {
+	position: relative;
+	top: 0px;
+	width: 100%;
+	pointer-events: auto;
+	height: auto;
+	opacity: 1;
+	display: block;
+	visibility: visible;
+	left: auto;
+	right: auto;
+}
+
+.menu-item-has-children ul button.dropdown-menu-toggle {
+	margin-top: 0px;
+	padding-top: 0px;
+	padding-bottom: 0px;
+}
+
+.main-navigation.toggled li button.dropdown-menu-toggle.toggled-on:before {
+	content: "\f106" !important;
+}
