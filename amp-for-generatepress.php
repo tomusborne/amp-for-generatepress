@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: AMP for GeneratePress
-Plugin URI:
+Plugin URI: https://github.com/tomusborne/amp-for-generatepress
 Description: Enable AMP features in GeneratePress.
 Version: 0.1
 Author: Tom Usborne
