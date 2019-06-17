@@ -330,7 +330,7 @@ function gpamp_add_sub_menu_dropdown_toggles( $item_output, $item, $depth, $args
 	$toggled_class    = 'toggled-on';
 	$dropdown_button .= sprintf(
 		' class="%s" [class]="%s"',
-		esc_attr( $dropdown_class . ( $expanded ? " $toggled_class" : '' ) ),
+		esc_attr( $dropdown_class ),
 		esc_attr( sprintf( "%s + ( $expanded_state_id ? %s : '' )", wp_json_encode( $dropdown_class ), wp_json_encode( " $toggled_class" ) ) )
 	);
 
