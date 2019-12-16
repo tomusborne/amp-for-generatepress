@@ -272,8 +272,27 @@ function ampgp_do_menu_toggle() {
 			aria-expanded="false"
 			[aria-expanded]="navMenuExpanded ? 'true' : 'false'"
 		>
-			<?php do_action( 'generate_inside_mobile_menu' ); ?>
-			<span class="mobile-menu"><?php echo apply_filters( 'generate_mobile_menu_label', __( 'Menu', 'gp-amp' ) ); // WPCS: XSS ok. ?></span>
+			<?php
+			do_action( 'generate_inside_mobile_menu' );
+
+			if ( function_exists( 'generate_do_svg_icon' ) ) {
+				generate_do_svg_icon( 'menu-bars', true );
+			}
+
+			$mobile_menu_label = apply_filters( 'generate_mobile_menu_label', __( 'Menu', 'gp-amp' ) );
+
+			if ( $mobile_menu_label ) {
+				printf(
+					'<span class="mobile-menu">%s</span>',
+					$mobile_menu_label
+				);
+			} else {
+				printf(
+					'<span class="screen-reader-text">%s</span>',
+					__( 'Menu', 'gp-amp' )
+				);
+			}
+			?>
 		</button>
 	<?php
 }
@@ -358,7 +377,12 @@ function gpamp_add_sub_menu_dropdown_toggles( $item_output, $item, $depth, $args
 		' on="%s"',
 		esc_attr( "tap:AMP.setState( { $expanded_state_id: ! $expanded_state_id } )" )
 	);
+
 	$dropdown_button .= '>';
+
+	if ( function_exists( 'generate_get_svg_icon' ) ) {
+		$dropdown_button .= generate_get_svg_icon( 'arrow' );
+	}
 
 	// Let the screen reader text in the button also update based on the expanded state.
 	$dropdown_button .= sprintf(

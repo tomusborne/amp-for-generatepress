@@ -27,6 +27,10 @@ button.dropdown-menu-toggle.toggled-on + .sub-menu {
 	right: auto;
 }
 
+nav.toggled button.dropdown-menu-toggle.toggled-on > .gp-icon svg {
+	transform: rotate(180deg);
+}
+
 .menu-item-has-children ul button.dropdown-menu-toggle {
 	margin-top: 0px;
 	padding-top: 0px;
