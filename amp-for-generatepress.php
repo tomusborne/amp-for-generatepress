@@ -49,12 +49,14 @@ function ampgp_do_scripts() {
  *
  * @since 0.1
  */
-function ampgp_do_generate_settings( $options ) {
-	$options['nav_dropdown_type'] = 'hover';
-	$options['back_to_top'] = '';
-	$options['nav_search'] = 'disable';
+function ampgp_do_generate_settings( $settings ) {
+	$settings['nav_dropdown_type'] = 'hover';
+	$settings['back_to_top'] = '';
+	$settings['nav_search'] = 'disable';
 
-	return $options;
+	return $settings;
+}
+
 }
 
 add_action( 'wp', 'ampgp_do_setup' );
