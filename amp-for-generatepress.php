@@ -57,6 +57,16 @@ function ampgp_do_generate_settings( $settings ) {
 	return $settings;
 }
 
+/**
+ * Change some GPP Blog settings if AMP is active.
+ *
+ * @since 0.1
+ */
+function ampgp_do_generate_blog_settings( $settings ) {
+	$settings['masonry'] = false;
+	$settings['infinite_scroll'] = false;
+
+	return $settings;
 }
 
 add_action( 'wp', 'ampgp_do_setup' );
@@ -70,7 +80,8 @@ function ampgp_do_setup() {
 		return;
 	}
 
-	add_filter( 'option_generate_settings', 'ampgp_do_generate_settings' );
+	add_filter( 'option_generate_settings', 	 'ampgp_do_generate_settings' );
+	add_filter( 'option_generate_blog_settings', 'ampgp_do_generate_blog_settings' );
 }
 
 /**
