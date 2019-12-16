@@ -34,6 +34,7 @@ function ampgp_do_scripts() {
 		wp_dequeue_script( 'generate-classlist' );
 		wp_dequeue_script( 'generate-sticky' );
 		wp_dequeue_script( 'generate-offside' );
+		wp_dequeue_script( 'generate-blog' );
 
 		wp_dequeue_style( 'generate-sticky' );
 		wp_dequeue_style( 'generate-offside' );
