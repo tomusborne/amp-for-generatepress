@@ -8,6 +8,7 @@ Author: Tom Usborne
 Author URI: https://generatepress.com
 License: GNU General Public License v2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
+GitHub Plugin URI: tomusborne/amp-for-generatepress
 */
 
 define( 'AMPGP_VERSION', 0.1 );
