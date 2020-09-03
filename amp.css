@@ -14,7 +14,7 @@
 	display: inline-block;
 }
 
-button.dropdown-menu-toggle.toggled-on + .sub-menu {
+nav.toggled button.dropdown-menu-toggle.toggled-on + .sub-menu {
 	position: relative;
 	top: 0px;
 	width: 100%;
@@ -37,7 +37,7 @@ nav.toggled button.dropdown-menu-toggle.toggled-on > .gp-icon svg {
 	padding-bottom: 0px;
 }
 
-.main-navigation.toggled li button.dropdown-menu-toggle.toggled-on:before {
+.main-navigation.toggled li button.dropdown-menu-toggle.toggled-on:not(.has-svg-icon):before {
 	content: "\f106" !important;
 }
 

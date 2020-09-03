@@ -41,7 +41,49 @@ function ampgp_do_scripts() {
 
 		wp_enqueue_style( 'gpamp', plugin_dir_url( __FILE__ ) . 'amp.css', array(), AMPGP_VERSION );
 		wp_add_inline_style( 'generate-navigation-branding', ampgp_navigation_logo() );
+		wp_add_inline_style( 'generate-style', ampgp_get_dynamic_css() );
 	}
+}
+
+function ampgp_get_dynamic_css() {
+	if ( ! class_exists( 'GeneratePress_CSS' ) || ! function_exists( 'generate_get_color_defaults' ) ) {
+		return;
+	}
+
+	$css = new GeneratePress_CSS();
+
+	$settings = wp_parse_args(
+		get_option( 'generate_settings', array() ),
+		generate_get_color_defaults()
+	);
+
+	$css->set_selector( '.main-navigation .main-nav ul .menu-item-has-children > button.dropdown-menu-toggle' );
+	$css->add_property( 'color', $settings['navigation_text_color'] );
+
+	$css->set_selector( '.main-navigation .main-nav ul .menu-item-has-children:hover > button.dropdown-menu-toggle, .main-navigation .main-nav ul .menu-item-has-children.sfHover > button.dropdown-menu-toggle' );
+	$css->add_property( 'color', $settings['navigation_text_hover_color'] );
+	$css->add_property( 'background-color', $settings['navigation_background_hover_color'] );
+
+	$css->set_selector( '.main-navigation .main-nav ul li[class*="current-menu-"] > button.dropdown-menu-toggle' );
+	$css->add_property( 'color', $settings['navigation_text_current_color'] );
+	$css->add_property( 'background-color', $settings['navigation_background_current_color'] );
+
+	$css->set_selector( '.main-navigation .main-nav ul ul li button.dropdown-menu-toggle' );
+	$css->add_property( 'color', $settings['subnavigation_text_color'] );
+
+	$css->set_selector( '.main-navigation .main-nav ul ul li:hover > button.dropdown-menu-toggle,.main-navigation .main-nav ul ul li.sfHover > button.dropdown-menu-toggle' );
+	$css->add_property( 'color', $settings['subnavigation_text_hover_color'] );
+	$css->add_property( 'background-color', $settings['subnavigation_background_hover_color'] );
+
+	$css->set_selector( '.main-navigation .main-nav ul ul li[class*="current-menu-"] > button.dropdown-menu-toggle' );
+	$css->add_property( 'color', $settings['subnavigation_text_current_color'] );
+	$css->add_property( 'background-color', $settings['subnavigation_background_current_color'] );
+
+	$css->set_selector( '.main-navigation .main-nav ul ul li[class*="current-menu-"]:hover > button.dropdown-menu-toggle,.main-navigation .main-nav ul ul li[class*="current-menu-"].sfHover > button.dropdown-menu-toggle' );
+	$css->add_property( 'color', $settings['subnavigation_text_current_color'] );
+	$css->add_property( 'background-color', $settings['subnavigation_background_current_color'] );
+
+	return $css->css_output();
 }
 
 /**
@@ -248,6 +290,7 @@ function ampgp_do_toggled_nav() {
 	echo '<div class="main-navigation toggled amp-tree-shaking-help" style="display: none;"></div>';
 }
 
+add_action( 'generate_inside_mobile_menu_control_wrapper', 'ampgp_do_menu_toggle' );
 add_action( 'generate_inside_navigation', 'ampgp_do_menu_toggle' );
 add_action( 'generate_inside_mobile_header', 'ampgp_do_menu_toggle' );
 /**
@@ -265,10 +308,16 @@ function ampgp_do_menu_toggle() {
 	if ( 'generate_inside_mobile_header' === current_action() ) {
 		$navigation = 'mobile-header';
 	}
+
+	$toggle_inline_wrapper = '';
+
+	if ( 'generate_inside_mobile_menu_control_wrapper' === current_action() ) {
+		$toggle_inline_wrapper = "mobile-menu-control-wrapper.toggleClass( 'class' = 'toggled' ),";
+	}
 	?>
 		<button
 			class="menu-toggle amp-menu-toggle"
-			on="tap:<?php echo $navigation; ?>.toggleClass( 'class' = 'toggled' ),AMP.setState( { navMenuExpanded: ! navMenuExpanded } )"
+			on="tap:<?php echo $navigation; ?>.toggleClass( 'class' = 'toggled' ),<?php echo $toggle_inline_wrapper; ?>AMP.setState( { navMenuExpanded: ! navMenuExpanded } )"
 			aria-expanded="false"
 			[aria-expanded]="navMenuExpanded ? 'true' : 'false'"
 		>
@@ -360,6 +409,11 @@ function gpamp_add_sub_menu_dropdown_toggles( $item_output, $item, $depth, $args
 	 */
 	$dropdown_button  = '<button';
 	$dropdown_class   = 'dropdown-menu-toggle';
+
+	if ( function_exists( 'generate_get_option' ) && 'svg' === generate_get_option( 'icons' ) ) {
+		$dropdown_class .= ' has-svg-icon';
+	}
+
 	$toggled_class    = 'toggled-on';
 	$dropdown_button .= sprintf(
 		' class="%s" [class]="%s"',
