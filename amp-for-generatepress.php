@@ -31,6 +31,7 @@ add_action( 'wp_enqueue_scripts', 'ampgp_do_scripts', 500 );
  */
 function ampgp_do_scripts() {
 	if ( ampgp_is_amp() ) {
+		wp_dequeue_script( 'generate-main' );
 		wp_dequeue_script( 'generate-menu' );
 		wp_dequeue_script( 'generate-a11y' );
 		wp_dequeue_script( 'generate-classlist' );
