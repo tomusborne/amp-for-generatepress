@@ -453,3 +453,17 @@ function gpamp_add_sub_menu_dropdown_toggles( $item_output, $item, $depth, $args
 	$item_output .= $dropdown_button;
 	return $item_output;
 }
+
+add_filter( 'generate_print_a11y_script', 'gpamp_remove_a11y_script' );
+/**
+ * Remove the a11y script from GeneratePress.
+ *
+ * @param bool $print Whether to print the script or not.
+ */
+function gpamp_remove_a11y_script( $print ) {
+    if ( ampgp_is_amp() ) {
+        return false;
+    }
+
+    return $print;
+}
