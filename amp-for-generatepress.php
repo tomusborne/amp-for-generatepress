@@ -3,7 +3,7 @@
  * Plugin Name: AMP for GeneratePress
  * Plugin URI: https://github.com/tomusborne/amp-for-generatepress
  * Description: Enable AMP features in GeneratePress.
- * Version: 0.1
+ * Version: 0.2
  * Author: Tom Usborne
  * Author URI: https://generatepress.com
  * License: GNU General Public License v2 or later
@@ -12,7 +12,7 @@
  * @package AMP for GeneratePress
 */
 
-define( 'AMPGP_VERSION', 0.1 );
+define( 'AMPGP_VERSION', 0.2 );
 
 /**
  * Check if AMP is active.
